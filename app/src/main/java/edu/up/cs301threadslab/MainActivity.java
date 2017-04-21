@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Chronometer;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
 
@@ -19,6 +20,7 @@ public class MainActivity extends Activity
     private AnimationView myAV;
     private Button theButton;
     private SeekBar theSeekBar;
+    private Chronometer chronometer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,6 +38,10 @@ public class MainActivity extends Activity
         //Let me know when someone adjusts the seekbar
         theSeekBar = (SeekBar)findViewById(R.id.seekBar);
         theSeekBar.setOnSeekBarChangeListener(this);
+        theSeekBar.setMax(900);
+
+        DrawThread d = new DrawThread();
+        d.start();
     }//onClick
 
     @Override
@@ -53,5 +59,22 @@ public class MainActivity extends Activity
     @Override
     public void onStartTrackingTouch(SeekBar seekBar) {}
     @Override
-    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {}
+    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+
+    }
+
+    public class DrawThread extends Thread
+    {
+        public void run()
+        {
+            while (true) {
+                myAV.postInvalidate();
+                try {
+                    Thread.sleep(50);
+                } catch (InterruptedException ie) {
+
+                }
+            }
+        }
+    }
 }

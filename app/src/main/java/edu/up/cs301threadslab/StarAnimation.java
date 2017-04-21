@@ -18,12 +18,17 @@ public class StarAnimation extends Animation {
     public static final int INIT_STAR_COUNT = 100;
     private Vector<Star> field = new Vector<Star>();
 
+    private int previousProgress = 0;
+
     /* when this is set to 'false' the next animation frame won't twinkle */
     private boolean twinkle = true;
 
     /** ctor expects to be told the size of the animation canvas */
     public StarAnimation(int initWidth, int initHeight) {
         super(initWidth, initHeight);
+
+        starAdderRemoverThread sART = new starAdderRemoverThread();
+        sART.start();
     }
 
     /** whenever the canvas size changes, generate new stars */
@@ -61,10 +66,12 @@ public class StarAnimation extends Animation {
     /** draws the next frame of the animation */
     @Override
     public void draw(Canvas canvas) {
-        for (Star s : field) {
-            s.draw(canvas);
-            if (this.twinkle) {
-                s.twinkle();
+        synchronized (field) {
+            for (Star s : field) {
+                s.draw(canvas);
+                if (this.twinkle) {
+                    s.twinkle();
+                }
             }
         }
 
@@ -77,5 +84,63 @@ public class StarAnimation extends Animation {
         int brightness = 255 - (newProgress * 2);
         Star.starPaint.setColor(Color.rgb(brightness, brightness, brightness));
         this.twinkle = false;
+
+        if (previousProgress > newProgress)
+        {
+            for (int i = 0; i < (previousProgress-newProgress); i++)
+            {
+                removeStar();
+            }
+        }
+
+        if (previousProgress < newProgress)
+        {
+            for (int i = 0; i < (newProgress-previousProgress); i++)
+            {
+                addStar();
+            }
+        }
+
+        previousProgress = newProgress;
+
+        printStars();
+    }
+
+    private void printStars()
+    {
+        int i = 0;
+        for (int j = 0; j < field.size(); j++)
+        {
+            i++;
+        }
+
+        Log.d("Num Stars", " " + i);
+    }
+
+    public class starAdderRemoverThread extends Thread {
+
+        public void run()
+        {
+            int r = 0;
+            while (true)
+            {
+                r = rand.nextInt(2);
+
+                    if (r == 0) {
+                        addStar();
+                    } else {
+                        removeStar();
+                    }
+
+                try
+                {
+                    Thread.sleep(2);
+                } catch (InterruptedException ie)
+                {
+
+                }
+            }
+        }
+
     }
 }//class StarAnimation
